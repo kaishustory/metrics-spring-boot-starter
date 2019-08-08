@@ -1,0 +1,22 @@
+# Maven 
+target/
+
+# IntelliJ IDEA
+*.iml
+*.iws
+*.ipr
+.idea/
+
+# Eclipse
+.settings/
+.classpath
+.project
+
+# SVN
+.svn/
+
+# macOS
+.DS_Store
+
+# Log
+logs/
