@@ -1,5 +1,7 @@
 package com.kaishustory.autoconfigure;
 
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.CountedAspect;
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -8,6 +10,7 @@ import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegi
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +27,7 @@ public class MicrometerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnClass(Timed.class)
     @ConditionalOnBean(MeterRegistry.class)
     public TimedAspect timedAspect(MeterRegistry registry) {
         return new TimedAspect(registry);
@@ -31,6 +35,7 @@ public class MicrometerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnClass(Counted.class)
     @ConditionalOnBean(MeterRegistry.class)
     public CountedAspect countedAspect(MeterRegistry registry) {
         return new CountedAspect(registry);
