@@ -21,8 +21,9 @@ import org.springframework.context.annotation.Configuration;
 public class MicrometerAutoConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = "spring.application", name = "name")
-    public MeterRegistryCustomizer<MeterRegistry> configurer(@Value("${spring.application.name}") String applicationName) {
-        return registry -> registry.config().commonTags("application", applicationName);
+    public MeterRegistryCustomizer<MeterRegistry> configurer(@Value("${spring.application.name}") String applicationName,
+                                                             @Value("${spring.profiles.active}") String profilesActive) {
+        return registry -> registry.config().commonTags("application", applicationName, "profile", profilesActive);
     }
 
     @Bean
