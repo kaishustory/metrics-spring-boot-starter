@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,9 +19,8 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureAfter(CompositeMeterRegistryAutoConfiguration.class)
 public class MicrometerAutoConfiguration {
     @Bean
-    @ConditionalOnProperty(prefix = "spring.application", name = "name")
-    public MeterRegistryCustomizer<MeterRegistry> configurer(@Value("${spring.application.name}") String applicationName,
-                                                             @Value("${spring.profiles.active}") String profilesActive) {
+    public MeterRegistryCustomizer<MeterRegistry> configurer(@Value("${spring.application.name:UNKNOWN}") String applicationName,
+                                                             @Value("${spring.profiles.active:UNKNOWN}") String profilesActive) {
         return registry -> registry.config().commonTags("application", applicationName, "profile", profilesActive);
     }
 
