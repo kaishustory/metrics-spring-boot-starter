@@ -14,17 +14,56 @@ public class DruidMetrics implements MeterBinder {
 
     @Override
     public void bindTo(MeterRegistry registry) {
-        // todo 增加tag，线程池名
-        Gauge.builder("test.druid.pooling.count", druidDataSource, DruidDataSource::getPoolingCount)
+        Gauge.builder("druid.pooling.count", druidDataSource, DruidDataSource::getPoolingCount)
+                .tag("pool", druidDataSource.getName())
                 .register(registry);
 
-        Gauge.builder("test.druid.close.count", druidDataSource, DruidDataSource::getCloseCount)
+        Gauge.builder("druid.pooling.peak", druidDataSource, DruidDataSource::getPoolingPeak)
+                .tag("pool", druidDataSource.getName())
                 .register(registry);
 
-        Gauge.builder("test.druid.commit.count", druidDataSource, DruidDataSource::getCommitCount)
+        Gauge.builder("druid.close.count", druidDataSource, DruidDataSource::getCloseCount)
+                .tag("pool", druidDataSource.getName())
                 .register(registry);
 
-        Gauge.builder("test.druid.error.count", druidDataSource, DruidDataSource::getErrorCount)
+        Gauge.builder("druid.commit.count", druidDataSource, DruidDataSource::getCommitCount)
+                .tag("pool", druidDataSource.getName())
+                .register(registry);
+
+        Gauge.builder("druid.error.count", druidDataSource, DruidDataSource::getErrorCount)
+                .tag("pool", druidDataSource.getName())
+                .register(registry);
+
+        Gauge.builder("druid.active.count", druidDataSource, DruidDataSource::getActiveCount)
+                .tag("pool", druidDataSource.getName())
+                .register(registry);
+
+        Gauge.builder("druid.active.peak", druidDataSource, DruidDataSource::getActivePeak)
+                .tag("pool", druidDataSource.getName())
+                .register(registry);
+
+        Gauge.builder("druid.create.count", druidDataSource, DruidDataSource::getCreateCount)
+                .tag("pool", druidDataSource.getName())
+                .register(registry);
+
+        Gauge.builder("druid.connect.count", druidDataSource, DruidDataSource::getConnectCount)
+                .tag("pool", druidDataSource.getName())
+                .register(registry);
+
+        Gauge.builder("druid.destroy.count", druidDataSource, DruidDataSource::getDestroyCount)
+                .tag("pool", druidDataSource.getName())
+                .register(registry);
+
+        Gauge.builder("druid.max.active", druidDataSource, DruidDataSource::getMaxActive)
+                .tag("pool", druidDataSource.getName())
+                .register(registry);
+
+        Gauge.builder("druid.max.idle", druidDataSource, DruidDataSource::getMaxIdle)
+                .tag("pool", druidDataSource.getName())
+                .register(registry);
+
+        Gauge.builder("druid.min.idle", druidDataSource, DruidDataSource::getMinIdle)
+                .tag("pool", druidDataSource.getName())
                 .register(registry);
     }
 }
