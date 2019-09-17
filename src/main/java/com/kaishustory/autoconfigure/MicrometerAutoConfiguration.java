@@ -4,16 +4,16 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.config.MeterFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
+import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.Order;
 
 @Configuration
-@AutoConfigureAfter(CompositeMeterRegistryAutoConfiguration.class)
+@AutoConfigureAfter(MetricsAutoConfiguration.class)
 @Import({TimedAspectConfiguration.class, CountedAspectConfiguration.class})
 public class MicrometerAutoConfiguration {
     @Bean
@@ -23,11 +23,15 @@ public class MicrometerAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @Order(0)
     public MeterFilter meterFilter() {
         return MeterFilter.deny(id -> {
             String uri = id.getTag("uri");
-            return StringUtils.startsWith(uri, "/actuator") || StringUtils.contains(uri, "favicon.ico") || !StringUtils.startsWith(uri, "/");
+            if (StringUtils.isNotBlank(uri)) {
+                return StringUtils.startsWith(uri, "/actuator") || StringUtils.contains(uri, "favicon.ico") || !StringUtils.startsWith(uri, "/");
+            }
+
+            return false;
         });
     }
 }
