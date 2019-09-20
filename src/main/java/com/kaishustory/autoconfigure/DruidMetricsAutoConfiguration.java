@@ -8,12 +8,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.jdbc.DataSourceUnwrapper;
 import org.springframework.boot.jdbc.metadata.DataSourcePoolMetadataProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 
 @Configuration
 @AutoConfigureAfter({MetricsAutoConfiguration.class, DataSourceAutoConfiguration.class,
@@ -24,18 +25,41 @@ public class DruidMetricsAutoConfiguration {
     @ConditionalOnBean(DataSource.class)
     @ConditionalOnMissingBean
     public DruidMetrics druidMetrics(DataSource dataSource) {
-        return new DruidMetrics(DataSourceUnwrapper.unwrap(dataSource,
-                DruidDataSource.class));
+        if (dataSource instanceof AbstractRoutingDataSource) {
+            try {
+                if (dataSource.isWrapperFor(DruidDataSource.class)) {
+                    return new DruidMetrics(dataSource.unwrap(DruidDataSource.class));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (dataSource instanceof DruidDataSource) {
+            return new DruidMetrics((DruidDataSource) dataSource);
+        }
+
+        return null;
     }
 
     @Bean
     public DataSourcePoolMetadataProvider druidPoolDataSourceMetadataProvider() {
         return dataSource -> {
-            DruidDataSource druidDataSource = DataSourceUnwrapper.unwrap(dataSource,
-                    DruidDataSource.class);
-            if (druidDataSource != null) {
+            if (dataSource instanceof AbstractRoutingDataSource) {
+                try {
+                    if (dataSource.isWrapperFor(DruidDataSource.class)) {
+                        return new DruidDataSourcePoolMetadata(dataSource.unwrap(DruidDataSource.class));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (dataSource instanceof DruidDataSource) {
+                DruidDataSource druidDataSource = (DruidDataSource) dataSource;
                 return new DruidDataSourcePoolMetadata(druidDataSource);
             }
+
             return null;
         };
     }
