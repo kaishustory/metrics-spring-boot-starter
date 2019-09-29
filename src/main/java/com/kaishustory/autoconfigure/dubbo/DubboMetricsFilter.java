@@ -20,11 +20,16 @@ public class DubboMetricsFilter implements Filter {
             String service = invoker.getInterface().getName();
             String method = RpcUtils.getMethodName(invocation);
 
-            LOGGER.debug("{},{},{}", service, method, elapsed);
+            LOGGER.debug("{},{},{},{}", service, method, elapsed / 1000D, error);
 
-            Tags tags = Tags.of("service", service, "method", method, "remoteHost", remoteHost, "result", error ? MonitorService.FAILURE : MonitorService.SUCCESS);
+            Tags tags = Tags.of("service", service,
+                    "method", method,
+                    "remoteHost", remoteHost,
+                    "result", error ? MonitorService.FAILURE : MonitorService.SUCCESS
+            );
 
-            Metrics.summary("dubbo.provider.invoke.seconds", tags).record(elapsed / 1000D);
+            Metrics.summary("dubbo." + invoker.getUrl().getParameter(Constants.SIDE_KEY) + ".invoke.seconds", tags)
+                    .record(elapsed / 1000D);
         } catch (Exception e) {
             LOGGER.error("Failed to monitor count service " + invoker.getUrl() + ", cause: " + e.getMessage(), e);
         }
@@ -32,21 +37,15 @@ public class DubboMetricsFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        String side = invoker.getUrl().getParameter(Constants.SIDE_KEY);
-
-        // 跳过Consumer
-        if (Constants.CONSUMER_SIDE.equals(side)) {
-            return invoker.invoke(invocation);
-        }
-
         RpcContext context = RpcContext.getContext();
+
         String remoteHost = context.getRemoteHost();
         long start = System.currentTimeMillis();
         try {
             Result result = invoker.invoke(invocation);
-            collect(invoker, invocation, remoteHost, start, false);
+            collect(invoker, invocation, remoteHost, start, result.hasException());
             return result;
-        } catch (RpcException e) {
+        } catch (Exception e) {
             collect(invoker, invocation, remoteHost, start, true);
             throw e;
         }
