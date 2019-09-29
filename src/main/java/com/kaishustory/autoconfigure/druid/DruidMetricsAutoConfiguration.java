@@ -1,4 +1,4 @@
-package com.kaishustory.autoconfigure;
+package com.kaishustory.autoconfigure.druid;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;

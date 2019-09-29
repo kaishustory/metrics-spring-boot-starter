@@ -1,3 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.kaishustory.autoconfigure.DruidMetricsAutoConfiguration,\
+com.kaishustory.autoconfigure.druid.DruidMetricsAutoConfiguration,\
 com.kaishustory.autoconfigure.MicrometerAutoConfiguration
