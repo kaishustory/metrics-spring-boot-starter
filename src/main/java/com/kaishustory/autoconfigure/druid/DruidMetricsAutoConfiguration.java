@@ -8,16 +8,16 @@ import org.springframework.boot.actuate.autoconfigure.metrics.export.simple.Simp
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.metadata.DataSourcePoolMetadataProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @AutoConfigureAfter({MetricsAutoConfiguration.class, DataSourceAutoConfiguration.class,
@@ -27,25 +27,26 @@ public class DruidMetricsAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(DruidMetricsAutoConfiguration.class);
 
     @Bean
-    @Scope("prototype")
     @ConditionalOnBean(DataSource.class)
-    @ConditionalOnMissingBean
-    public DruidMetrics druidMetrics(DataSource dataSource) {
-        if (dataSource instanceof AbstractRoutingDataSource) {
-            try {
-                if (dataSource.isWrapperFor(DruidDataSource.class)) {
-                    return new DruidMetrics(dataSource.unwrap(DruidDataSource.class));
+    public DruidMetrics druidMetrics(List<DataSource> dataSourceList) {
+        LOGGER.info("Found {} datasource.", dataSourceList.size());
+        List<DruidDataSource> druidDataSourceList = new ArrayList<>();
+
+        for (DataSource dataSource : dataSourceList) {
+            if (dataSource instanceof AbstractRoutingDataSource) {
+                try {
+                    if (dataSource.isWrapperFor(DruidDataSource.class)) {
+                        druidDataSourceList.add(dataSource.unwrap(DruidDataSource.class));
+                    }
+                } catch (SQLException e) {
+                    LOGGER.error("Initialize DruidMetrics error.", e);
                 }
-            } catch (SQLException e) {
-                LOGGER.error("Initialize DruidMetrics error.", e);
+            } else if (dataSource instanceof DruidDataSource) {
+                druidDataSourceList.add((DruidDataSource) dataSource);
             }
         }
 
-        if (dataSource instanceof DruidDataSource) {
-            return new DruidMetrics((DruidDataSource) dataSource);
-        }
-
-        return null;
+        return new DruidMetrics(druidDataSourceList);
     }
 
     @Bean
