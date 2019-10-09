@@ -4,6 +4,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import org.springframework.boot.jdbc.metadata.AbstractDataSourcePoolMetadata;
 
 public class DruidDataSourcePoolMetadata extends AbstractDataSourcePoolMetadata<DruidDataSource> {
+    @SuppressWarnings("WeakerAccess")
     public DruidDataSourcePoolMetadata(DruidDataSource dataSource) {
         super(dataSource);
     }

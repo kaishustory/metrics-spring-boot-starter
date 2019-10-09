@@ -4,6 +4,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import org.springframework.lang.NonNull;
 
 public class DruidMetrics implements MeterBinder {
     private DruidDataSource druidDataSource;
@@ -13,7 +14,7 @@ public class DruidMetrics implements MeterBinder {
     }
 
     @Override
-    public void bindTo(MeterRegistry registry) {
+    public void bindTo(@NonNull MeterRegistry registry) {
         Gauge.builder("druid.pooling.count", druidDataSource, DruidDataSource::getPoolingCount)
                 .tag("pool", druidDataSource.getName())
                 .register(registry);

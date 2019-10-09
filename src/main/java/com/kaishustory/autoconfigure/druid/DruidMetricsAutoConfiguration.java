@@ -1,6 +1,8 @@
 package com.kaishustory.autoconfigure.druid;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.simple.SimpleMetricsExportAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -21,6 +23,8 @@ import java.sql.SQLException;
         SimpleMetricsExportAutoConfiguration.class})
 @ConditionalOnClass(DruidDataSource.class)
 public class DruidMetricsAutoConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DruidMetricsAutoConfiguration.class);
+
     @Bean
     @ConditionalOnBean(DataSource.class)
     @ConditionalOnMissingBean
@@ -31,7 +35,7 @@ public class DruidMetricsAutoConfiguration {
                     return new DruidMetrics(dataSource.unwrap(DruidDataSource.class));
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOGGER.error("Initialize DruidMetrics error.", e);
             }
         }
 
@@ -51,7 +55,7 @@ public class DruidMetricsAutoConfiguration {
                         return new DruidDataSourcePoolMetadata(dataSource.unwrap(DruidDataSource.class));
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    LOGGER.error("Initialize DataSourcePoolMetadataProvider error.", e);
                 }
             }
 
