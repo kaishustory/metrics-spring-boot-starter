@@ -8,6 +8,7 @@ import org.springframework.boot.actuate.autoconfigure.metrics.export.simple.Simp
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.metadata.DataSourcePoolMetadataProvider;
 import org.springframework.context.annotation.Bean;
@@ -28,8 +29,9 @@ public class DruidMetricsAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(DataSource.class)
+    @ConditionalOnMissingBean
     public DruidMetrics druidMetrics(List<DataSource> dataSourceList) {
-        LOGGER.info("Found {} datasource.", dataSourceList.size());
+        LOGGER.info("Found {} datasource", dataSourceList.size());
         List<DruidDataSource> druidDataSourceList = new ArrayList<>();
 
         for (DataSource dataSource : dataSourceList) {
@@ -39,10 +41,12 @@ public class DruidMetricsAutoConfiguration {
                         druidDataSourceList.add(dataSource.unwrap(DruidDataSource.class));
                     }
                 } catch (SQLException e) {
-                    LOGGER.error("Initialize DruidMetrics error.", e);
+                    LOGGER.error("DataSource is not DruidDataSource", e);
                 }
             } else if (dataSource instanceof DruidDataSource) {
                 druidDataSourceList.add((DruidDataSource) dataSource);
+            } else {
+                LOGGER.info("None DruidDataSource found");
             }
         }
 
@@ -58,7 +62,7 @@ public class DruidMetricsAutoConfiguration {
                         return new DruidDataSourcePoolMetadata(dataSource.unwrap(DruidDataSource.class));
                     }
                 } catch (SQLException e) {
-                    LOGGER.error("Initialize DataSourcePoolMetadataProvider error.", e);
+                    LOGGER.error("Initialize DataSourcePoolMetadataProvider error", e);
                 }
             }
 
