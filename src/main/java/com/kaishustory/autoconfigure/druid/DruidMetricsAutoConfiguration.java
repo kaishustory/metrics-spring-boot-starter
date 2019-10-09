@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.metadata.DataSourcePoolMetadataProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 import javax.sql.DataSource;
@@ -26,6 +27,7 @@ public class DruidMetricsAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(DruidMetricsAutoConfiguration.class);
 
     @Bean
+    @Scope("prototype")
     @ConditionalOnBean(DataSource.class)
     @ConditionalOnMissingBean
     public DruidMetrics druidMetrics(DataSource dataSource) {
