@@ -17,8 +17,9 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Configuration
 @AutoConfigureAfter({MetricsAutoConfiguration.class, DataSourceAutoConfiguration.class,
@@ -32,7 +33,7 @@ public class DruidMetricsAutoConfiguration {
     @ConditionalOnMissingBean
     public DruidMetrics druidMetrics(List<DataSource> dataSourceList) {
         LOGGER.info("Found {} datasource", dataSourceList.size());
-        List<DruidDataSource> druidDataSourceList = new ArrayList<>();
+        Set<DruidDataSource> druidDataSourceList = new HashSet<>();
 
         for (DataSource dataSource : dataSourceList) {
             if (dataSource instanceof AbstractRoutingDataSource) {
@@ -48,6 +49,10 @@ public class DruidMetricsAutoConfiguration {
             } else {
                 LOGGER.info("None DruidDataSource found");
             }
+        }
+
+        for (DruidDataSource druidDataSource : druidDataSourceList) {
+            LOGGER.info("Exporting metrics for {} datasource", druidDataSource.getName());
         }
 
         return new DruidMetrics(druidDataSourceList);

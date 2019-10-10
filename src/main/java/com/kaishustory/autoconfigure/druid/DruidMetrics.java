@@ -6,12 +6,12 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import org.springframework.lang.NonNull;
 
-import java.util.List;
+import java.util.Set;
 
 public class DruidMetrics implements MeterBinder {
-    private List<DruidDataSource> druidDataSourceList;
+    private Set<DruidDataSource> druidDataSourceList;
 
-    public DruidMetrics(List<DruidDataSource> druidDataSourceList) {
+    public DruidMetrics(Set<DruidDataSource> druidDataSourceList) {
         this.druidDataSourceList = druidDataSourceList;
     }
 
